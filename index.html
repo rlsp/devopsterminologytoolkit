@@ -14,8 +14,9 @@
   <style>
     body { background:#1e1e1e; color:#eaeaea; overflow:hidden; }
     .sidebar { height:100vh; overflow-y:auto; background:#f8f9fa; border-right:1px solid #ddd; padding:1rem; }
-    .sidebar h2 { font-family:'Montserrat',sans-serif; font-weight:700; font-size:1.25rem; margin-bottom:1rem; color:#0d6efd; display:flex; justify-content:space-between; align-items:center; }
+    .sidebar h2 { font-family:'Montserrat',sans-serif; font-weight:700; font-size:0.75rem; margin-bottom:1rem; color:#0d6efd; display:flex; justify-content:space-between; align-items:center; }
     .search-box { margin-bottom:1rem; }
+    .instructions { font-size: 0.75rem; margin-bottom:1rem; }
     .btn-random, .btn-contribute { margin-bottom:.5rem; width:100%; }
     .settings-icon { cursor:pointer; font-size:1.2rem; color:#0d6efd; }
     .settings-pulse { animation:pulse 1s infinite; }
@@ -73,8 +74,11 @@
       <!-- Sidebar -->
       <div class="col-md-3 col-lg-2 sidebar">
         <h2>
-          <span>Hello, Engineer.</span>
-          <i id="settingsIcon" class="fa-solid fa-gear settings-icon"></i>
+          <span>Welcome.</span>
+          <span>
+            <i id="settingsIcon" class="fa-solid fa-gear settings-icon"></i>
+            <i id="helpIcon" class="fa-solid fa-circle-question settings-icon ms-3" title="Help"></i>
+          </span>
         </h2>
         <button id="randomBtn" class="btn btn-sm btn-outline-primary btn-random">
           <i class="fa-solid fa-shuffle"></i> Random Word
@@ -136,6 +140,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
+          <div class="instructions">Ensure you have the Write Access Key first from the administrator.</div>
           <form id="contributeForm">
             <div class="mb-3"><label class="form-label">Word</label><input id="contribWord" class="form-control" required></div>
             <div class="mb-3"><label class="form-label">Definition</label><textarea id="contribDefinition" class="form-control" required></textarea></div>
@@ -159,6 +164,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
+          <div class="instructions">Ensure you have the Write Access Key first from the administrator.</div>
           <form id="editForm">
             <input type="hidden" id="editIndex">
             <div class="mb-3"><label class="form-label">Word</label><input id="editWord" class="form-control" required></div>
@@ -169,6 +175,87 @@
             <div id="editMessage"></div>
             <button type="submit" class="btn btn-warning w-100"><i class="fa-solid fa-save"></i> Save</button>
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Help Modal -->
+  <div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content text-dark">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa-solid fa-circle-question"></i> Help & FAQ</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="accordion" id="helpAccordion">
+
+            <!-- How to Use -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingUse">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUse" aria-expanded="true" aria-controls="collapseUse">
+                  How to Use
+                </button>
+              </h2>
+              <div id="collapseUse" class="accordion-collapse collapse show" aria-labelledby="headingUse" data-bs-parent="#helpAccordion">
+                <div class="accordion-body">
+                  Browse the dictionary using the list on the left. Click a word to see its definition and sample sentence. Use "Random Word" to explore, or search by keywords. You can contribute new words using the "Contribute" button.
+                </div>
+              </div>
+            </div>
+
+            <!-- How to Configure -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingConfig">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConfig" aria-expanded="false" aria-controls="collapseConfig">
+                  How to Configure
+                </button>
+              </h2>
+              <div id="collapseConfig" class="accordion-collapse collapse" aria-labelledby="headingConfig" data-bs-parent="#helpAccordion">
+                <div class="accordion-body">
+                  Click the <i class="fa-solid fa-gear"></i> icon to open settings. Enter your JSONBin <strong>Bin ID</strong> and <strong>Read Access Key</strong> to load data. Save to persist configuration in your browser.
+                </div>
+              </div>
+            </div>
+
+            <!-- Tour / Sections -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingTour">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTour" aria-expanded="false" aria-controls="collapseTour">
+                  Tour of Sections
+                </button>
+              </h2>
+              <div id="collapseTour" class="accordion-collapse collapse" aria-labelledby="headingTour" data-bs-parent="#helpAccordion">
+                <div class="accordion-body">
+                  <ul>
+                    <li><strong>Sidebar:</strong> Search words, browse list, random selection, contribute words.</li>
+                    <li><strong>Main Content:</strong> Displays selected word, definition, sample sentence, category, and extra notes.</li>
+                    <li><strong>Word of the Day:</strong> Rotates daily based on a starting date.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- API Keys Explanation -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingKeys">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseKeys" aria-expanded="false" aria-controls="collapseKeys">
+                  API Keys Explanation
+                </button>
+              </h2>
+              <div id="collapseKeys" class="accordion-collapse collapse" aria-labelledby="headingKeys" data-bs-parent="#helpAccordion">
+                <div class="accordion-body">
+                  <ul>
+                    <li><strong>Read Access Key:</strong> Required to fetch data from your JSONBin.</li>
+                    <li><strong>Write Access Key:</strong> Required when contributing or editing words.</li>
+                    <li>Keep your keys secure. Only store them locally in your browser or trusted environment.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
     </div>
@@ -333,6 +420,10 @@
       document.getElementById("contributeForm").reset();
       document.getElementById("contributeMessage").innerHTML="";
       new bootstrap.Modal(document.getElementById("contributeModal")).show();
+    });
+
+    helpIcon.addEventListener("click", () => {
+      new bootstrap.Modal(document.getElementById("helpModal")).show();
     });
 
     document.getElementById("contributeForm").addEventListener("submit", async e => {
