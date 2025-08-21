@@ -57,7 +57,7 @@
 
       <!-- Main Content -->
       <div class="col-md-9 col-lg-10 content">
-        <p class="terminal-header">DevOps Terminology Toolkit</p>
+        <p class="terminal-header">DevOps Terminal</p>
         <div id="wordDetails" class="terminal-window">
           <div id="wotdBlock" class="word-of-day-block"></div>
           <div id="selectedWord" class="fade-in">
@@ -97,7 +97,7 @@
             </div>
             <div class="mb-3">
               <label class="form-label">Contributor Access Key</label>
-              <input type="password" class="form-control" id="userApiKey" placeholder="Enter your JSONBin Contributor Key" required>
+              <input type="password" class="form-control" id="userApiKey" placeholder="Enter your Contributor Key" required>
             </div>
             <button type="submit" class="btn btn-primary w-100">
               <i class="fa-solid fa-upload"></i> Submit
@@ -138,7 +138,7 @@
             </div>
             <div class="mb-3">
               <label class="form-label">Editor Access Key</label>
-              <input type="password" class="form-control" id="editApiKey" placeholder="Enter your JSONBin Editor Key" required>
+              <input type="password" class="form-control" id="editApiKey" placeholder="Enter your Editor Key" required>
             </div>
             <button type="submit" class="btn btn-warning w-100">
               <i class="fa-solid fa-save"></i> Save Changes
@@ -171,6 +171,7 @@
     const wotdBlock = document.getElementById("wotdBlock");
 
     let data = [];
+    let currentList = []; // 👈 track visible words
 
     function showError(message) {
       selectedWordDiv.innerHTML = `
@@ -230,6 +231,7 @@
     });
 
     function renderWordList(words) {
+      currentList = words; // 👈 save visible words
       wordList.innerHTML = "";
       words.forEach((item, index) => {
         const li = document.createElement("li");
@@ -240,11 +242,14 @@
     }
 
     function showWord(index, li=null) {
+      const word = currentList[index]; // 👈 fix mismatch
+      if (!word) return;
+
       if (li) {
         document.querySelectorAll(".word-list li").forEach(el => el.classList.remove("active"));
         li.classList.add("active");
       }
-      const word = data[index];
+
       const definition = word.Definition ? word.Definition.replace(/\n/g, "<br>") : "";
       const sentence   = word.Sentence ? word.Sentence.replace(/\n/g, "\n") : "";
       const more       = word.More ? word.More.replace(/\n/g, "<br>") : "";
@@ -260,10 +265,11 @@
         <p class="definition"><strong>Definition:</strong> ${definition}</p>
         <p class="sentence" id="typedSentence"></p>
         ${more ? `<p class="more"><i class="fa-solid fa-circle-info"></i> ${more}</p>` : ""}
-        <button class="btn btn-sm btn-warning mt-3" onclick="openEditModal(${index})">
+        <button class="btn btn-sm btn-warning mt-3" onclick="openEditModal(${data.indexOf(word)})">
           <i class="fa-solid fa-pen"></i> Edit
         </button>
       `;
+
       if (sentence) typeSentence(sentence, document.getElementById("typedSentence"), 35);
     }
 
