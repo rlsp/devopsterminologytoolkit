@@ -14,24 +14,52 @@
   <style>
     body { background:#1e1e1e; color:#eaeaea; overflow:hidden; }
     .sidebar { height:100vh; overflow-y:auto; background:#f8f9fa; border-right:1px solid #ddd; padding:1rem; }
-    .sidebar h2 { font-family:'Montserrat',sans-serif; font-weight:700; font-size:1.25rem; margin-bottom:1rem; color:#0d6efd; }
+    .sidebar h2 { font-family:'Montserrat',sans-serif; font-weight:700; font-size:1.25rem; margin-bottom:1rem; color:#0d6efd; display:flex; justify-content:space-between; align-items:center; }
     .search-box { margin-bottom:1rem; }
     .btn-random, .btn-contribute { margin-bottom:.5rem; width:100%; }
+    .settings-icon { cursor:pointer; font-size:1.2rem; color:#0d6efd; }
+    .settings-pulse { animation:pulse 1s infinite; }
+    @keyframes pulse { 0% {transform:scale(1);} 50% {transform:scale(1.2);} 100% {transform:scale(1);} }
     .word-list { list-style:none; padding-left:0; margin:0; }
     .word-list li { padding:.5rem .75rem; cursor:pointer; border-radius:8px; transition:background .2s,color .2s; font-weight:500; color:#333; }
     .word-list li:hover, .word-list li.active { background:#0d6efd; color:white; }
     .content { padding:2rem; height:100vh; overflow-y:auto; background:#111; font-family:'Source Code Pro',monospace; border-left:2px solid #0d6efd; }
     .terminal-header { background:#0d6efd; color:white; padding:0.5rem 1rem; border-radius:8px 8px 0 0; font-size:0.9rem; margin-bottom:0; }
     .terminal-window { background:#1e1e1e; padding:1.5rem; border-radius:0 0 8px 8px; box-shadow:0 0 10px rgba(13,110,253,0.4); }
-    .word-of-day-block { background:#0d6efd1a; border-left:4px solid #0d6efd; padding:1rem; border-radius:6px; margin-bottom:1.5rem; }
-    .word-of-day-block h2 { color:#0d6efd; margin-bottom:0.75rem; font-size:1.1rem; }
-    .word-of-day-inline { display:flex; align-items:center; gap:0.5rem; font-weight:bold; font-size:1.2rem; margin-bottom:0.5rem; }
-    .word-of-day-block .wotd-definition { color:#ddd; font-size:0.95rem; line-height:1.4; }
+
+    /* Refined Word of the Day styling */
+    .word-of-day-block {
+      background: #2a2a2a;
+      border-left: none;
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      color: #bbb;
+    }
+    .word-of-day-block h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #888;
+    }
+    .word-of-day-inline {
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+      color: #ccc;
+    }
+    .wotd-definition {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      color: #aaa;
+    }
+
     .word-title { font-weight:700; font-size:1.4rem; color:#0d6efd; margin-bottom:1rem; }
     .definition { font-size:1rem; line-height:1.5; margin-bottom:1rem; color:#eaeaea; }
     .sentence { color:#9cdcfe; margin-bottom:1rem; white-space:pre-wrap; }
     .more { font-size:0.9rem; color:#ce9178; }
-    .badge-custom { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#ccc; font-size:0.75rem; font-weight:500; border-radius:6px; padding:0.25rem 0.5rem; }
+    .badge-custom { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#999; font-size:0.75rem; font-weight:500; border-radius:6px; padding:0.25rem 0.5rem; }
     .fade-in { animation:fadeIn 0.4s ease; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
     .cursor { display:inline-block; margin-left:4px; color:#0d6efd; animation:blink 1s step-start infinite; }
@@ -44,7 +72,10 @@
     <div class="row">
       <!-- Sidebar -->
       <div class="col-md-3 col-lg-2 sidebar">
-        <h2><i class="fa-solid fa-book"></i> Dictionary</h2>
+        <h2>
+          <span><i class="fa-solid fa-book"></i> Dictionary</span>
+          <i id="settingsIcon" class="fa-solid fa-gear settings-icon"></i>
+        </h2>
         <button id="randomBtn" class="btn btn-sm btn-outline-primary btn-random">
           <i class="fa-solid fa-dice"></i> Random Word
         </button>
@@ -69,41 +100,51 @@
     </div>
   </div>
 
+  <!-- Settings Modal -->
+  <div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content text-dark">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa-solid fa-gear"></i> Settings</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="settingsForm">
+            <div class="mb-3">
+              <label class="form-label">Bin ID</label>
+              <input type="text" class="form-control" id="settingsBinId" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Read Access Key</label>
+              <input type="password" class="form-control" id="settingsReadKey" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fa-solid fa-save"></i> Save Settings
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Contribute Modal -->
   <div class="modal fade" id="contributeModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content text-dark">
         <div class="modal-header">
-          <h5 class="modal-title"><i class="fa-solid fa-plus"></i> Contribute a Word</h5>
+          <h5 class="modal-title"><i class="fa-solid fa-plus"></i> Contribute</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <form id="contributeForm">
-            <div class="mb-3">
-              <label class="form-label">Word</label>
-              <input type="text" class="form-control" id="newWord" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Definition</label>
-              <textarea class="form-control" id="newDefinition" required></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Sentence</label>
-              <textarea class="form-control" id="newSentence"></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Category</label>
-              <input type="text" class="form-control" id="newCategory">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Contributor Access Key</label>
-              <input type="password" class="form-control" id="userApiKey" placeholder="Enter your Contributor Key" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">
-              <i class="fa-solid fa-upload"></i> Submit
-            </button>
+            <div class="mb-3"><label class="form-label">Word</label><input id="contribWord" class="form-control" required></div>
+            <div class="mb-3"><label class="form-label">Definition</label><textarea id="contribDefinition" class="form-control" required></textarea></div>
+            <div class="mb-3"><label class="form-label">Sentence</label><textarea id="contribSentence" class="form-control"></textarea></div>
+            <div class="mb-3"><label class="form-label">Category</label><input id="contribCategory" class="form-control"></div>
+            <div class="mb-3"><label class="form-label">Write Access Key</label><input id="contribApiKey" type="password" class="form-control" required></div>
+            <div id="contributeMessage"></div>
+            <button type="submit" class="btn btn-success w-100"><i class="fa-solid fa-paper-plane"></i> Submit</button>
           </form>
-          <div id="contributeMessage" class="mt-3"></div>
         </div>
       </div>
     </div>
@@ -114,37 +155,20 @@
     <div class="modal-dialog">
       <div class="modal-content text-dark">
         <div class="modal-header">
-          <h5 class="modal-title"><i class="fa-solid fa-pen"></i> Edit Word</h5>
+          <h5 class="modal-title"><i class="fa-solid fa-pen"></i> Edit Entry</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <form id="editForm">
             <input type="hidden" id="editIndex">
-            <div class="mb-3">
-              <label class="form-label">Word</label>
-              <input type="text" class="form-control" id="editWord" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Definition</label>
-              <textarea class="form-control" id="editDefinition" required></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Sentence</label>
-              <textarea class="form-control" id="editSentence"></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Category</label>
-              <input type="text" class="form-control" id="editCategory">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Editor Access Key</label>
-              <input type="password" class="form-control" id="editApiKey" placeholder="Enter your Editor Key" required>
-            </div>
-            <button type="submit" class="btn btn-warning w-100">
-              <i class="fa-solid fa-save"></i> Save Changes
-            </button>
+            <div class="mb-3"><label class="form-label">Word</label><input id="editWord" class="form-control" required></div>
+            <div class="mb-3"><label class="form-label">Definition</label><textarea id="editDefinition" class="form-control" required></textarea></div>
+            <div class="mb-3"><label class="form-label">Sentence</label><textarea id="editSentence" class="form-control"></textarea></div>
+            <div class="mb-3"><label class="form-label">Category</label><input id="editCategory" class="form-control"></div>
+            <div class="mb-3"><label class="form-label">Write Access Key</label><input id="editApiKey" type="password" class="form-control" required></div>
+            <div id="editMessage"></div>
+            <button type="submit" class="btn btn-warning w-100"><i class="fa-solid fa-save"></i> Save</button>
           </form>
-          <div id="editMessage" class="mt-3"></div>
         </div>
       </div>
     </div>
@@ -152,38 +176,50 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  
+
   <script>
-    // 🔹 CONFIG
-    const BIN_ID = "68a68980d0ea881f405ed3e7";
-    const READ_API_KEY = "$2a$10$yv9gkdaeoe6URs8IkIwec.XLUhRXBqPJjzLLZOQAo1emvg5AR9xym"; // safe for fetch
+    // SETTINGS
+    let BIN_ID = localStorage.getItem("BIN_ID") || "";
+    let READ_API_KEY = localStorage.getItem("READ_API_KEY") || "";
+    const settingsIcon = document.getElementById("settingsIcon");
+    const settingsForm = document.getElementById("settingsForm");
 
-    // DOM Elements
-    const wordList = document.getElementById("wordList");
-    const selectedWordDiv = document.getElementById("selectedWord");
-    const searchBox = document.getElementById("searchBox");
-    const randomBtn = document.getElementById("randomBtn");
-    const contributeBtn = document.getElementById("contributeBtn");
-    const contributeForm = document.getElementById("contributeForm");
-    const contributeMessage = document.getElementById("contributeMessage");
-    const editForm = document.getElementById("editForm");
-    const editMessage = document.getElementById("editMessage");
-    const wotdBlock = document.getElementById("wotdBlock");
-
-    let data = [];
-    let currentList = []; // 👈 track visible words
-
-    function showError(message) {
-      selectedWordDiv.innerHTML = `
-        <div class="error-block">
-          <h1 class="word-title text-danger">&gt; Error</h1>
-          <p><strong>Could not fetch dictionary data from jsonbin.io</strong></p>
-          <p>Details: ${message}</p>
-        </div>
-      `;
+    function checkSettings() {
+      if (!BIN_ID || !READ_API_KEY) {
+        settingsIcon.classList.add("settings-pulse");
+        return false;
+      } else {
+        settingsIcon.classList.remove("settings-pulse");
+        return true;
+      }
     }
 
+    settingsIcon.addEventListener("click", () => {
+      document.getElementById("settingsBinId").value = BIN_ID;
+      document.getElementById("settingsReadKey").value = READ_API_KEY;
+      new bootstrap.Modal(document.getElementById("settingsModal")).show();
+    });
+
+    settingsForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      BIN_ID = document.getElementById("settingsBinId").value.trim();
+      READ_API_KEY = document.getElementById("settingsReadKey").value.trim();
+      localStorage.setItem("BIN_ID", BIN_ID);
+      localStorage.setItem("READ_API_KEY", READ_API_KEY);
+      checkSettings();
+      bootstrap.Modal.getInstance(document.getElementById("settingsModal")).hide();
+      refreshData();
+    });
+
+    // DATA & FUNCTIONS
+    let data = [];
+    let currentList = [];
+    const wordList = document.getElementById("wordList");
+    const selectedWordDiv = document.getElementById("selectedWord");
+    const wotdBlock = document.getElementById("wotdBlock");
+
     async function fetchData() {
+      if (!checkSettings()) return [];
       try {
         const url = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
         const res = await fetch(url, { headers: { "X-Access-Key": READ_API_KEY } });
@@ -192,7 +228,7 @@
         return json.record;
       } catch (err) {
         console.error("Failed to fetch JSON:", err);
-        showError(err.message);
+        selectedWordDiv.innerHTML = `<div class="error-block"><strong>Error:</strong> ${err.message}</div>`;
         return [];
       }
     }
@@ -201,24 +237,24 @@
       const url = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
       const res = await fetch(url, {
         method: "PUT",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "X-Access-Key": apiKey 
+          "X-Access-Key": apiKey
         },
         body: JSON.stringify(newData)
       });
       if (!res.ok) throw new Error(`HTTP ${res.status} – ${res.statusText}`);
-      return await res.json();
+      return res.json();
     }
 
     async function refreshData() {
+      if (!checkSettings()) return;
       data = await fetchData();
+      if (!data || data.length === 0) return;
       renderWordList(data);
       const { word: wotdWord } = getWordOfTheDay(data);
       const wotdDef = wotdWord.Definition.replace(/\n/g, "<br>");
-      const wotdCategory = wotdWord.Category 
-        ? `<span class="badge-custom"><i class="fa-solid fa-tag"></i> ${wotdWord.Category}</span>` 
-        : "";
+      const wotdCategory = wotdWord.Category ? `<span class="badge-custom"><i class="fa-solid fa-tag"></i> ${wotdWord.Category}</span>` : "";
       wotdBlock.innerHTML = `
         <h2><i class="fa-solid fa-calendar-day"></i> Word of the Day</h2>
         <div class="word-of-day-inline">${wotdWord.Word} ${wotdCategory}</div>
@@ -226,12 +262,8 @@
       `;
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      await refreshData();
-    });
-
     function renderWordList(words) {
-      currentList = words; // 👈 save visible words
+      currentList = words;
       wordList.innerHTML = "";
       words.forEach((item, index) => {
         const li = document.createElement("li");
@@ -242,132 +274,117 @@
     }
 
     function showWord(index, li=null) {
-      const word = currentList[index]; // 👈 fix mismatch
+      const word = currentList[index];
       if (!word) return;
-
       if (li) {
         document.querySelectorAll(".word-list li").forEach(el => el.classList.remove("active"));
         li.classList.add("active");
       }
-
       const definition = word.Definition ? word.Definition.replace(/\n/g, "<br>") : "";
       const sentence   = word.Sentence ? word.Sentence.replace(/\n/g, "\n") : "";
       const more       = word.More ? word.More.replace(/\n/g, "<br>") : "";
       const category   = word.Category ? `<span class="badge-custom"><i class="fa-solid fa-tag"></i> ${word.Category}</span>` : "";
-
-      selectedWordDiv.classList.remove("fade-in"); 
-      void selectedWordDiv.offsetWidth; 
-      selectedWordDiv.classList.add("fade-in");
-
+      selectedWordDiv.classList.remove("fade-in"); void selectedWordDiv.offsetWidth; selectedWordDiv.classList.add("fade-in");
       selectedWordDiv.innerHTML = `
         <h1 class="word-title">&gt; ${word.Word}<span class="cursor">_</span></h1>
         ${category ? `<div class="mb-3">${category}</div>` : ""}
         <p class="definition"><strong>Definition:</strong> ${definition}</p>
-        <p class="sentence" id="typedSentence"></p>
+        <p class="sentence" id="typedSentence"><strong>Sample sentence:</strong><br></p>
         ${more ? `<p class="more"><i class="fa-solid fa-circle-info"></i> ${more}</p>` : ""}
-        <button class="btn btn-sm btn-warning mt-3" onclick="openEditModal(${data.indexOf(word)})">
-          <i class="fa-solid fa-pen"></i> Edit
-        </button>
+        <button class="btn btn-sm btn-warning mt-3" onclick="openEditModal(${data.indexOf(word)})"><i class="fa-solid fa-pen"></i> Edit</button>
       `;
-
       if (sentence) typeSentence(sentence, document.getElementById("typedSentence"), 35);
     }
 
     function typeSentence(text, element, delay=40) {
-      element.innerHTML = `<i class="fa-solid fa-terminal"></i> <strong>Sample sentence:</strong> `; 
-      let i = 0;
-      function type() {
-        if (i < text.length) {
-          const char = text.charAt(i);
-          element.innerHTML += (char === "\n") ? "<br>" : char;
-          i++;
-          setTimeout(type, delay);
+      element.innerHTML = "<strong>Sample sentence:</strong><br>";
+      let i=0;
+      function typing() {
+        if (i<text.length) {
+          element.innerHTML += text.charAt(i) === "\n" ? "<br>" : text.charAt(i);
+          i++; setTimeout(typing, delay);
         }
       }
-      type();
+      typing();
     }
-
-    searchBox.addEventListener("input", function () {
-      const query = this.value.toLowerCase();
-      const filtered = data.filter(item => item.Word.toLowerCase().includes(query));
-      renderWordList(filtered);
-    });
-
-    randomBtn.addEventListener("click", function () {
-      const randIndex = Math.floor(Math.random() * data.length);
-      showWord(randIndex);
-    });
 
     function getWordOfTheDay(data) {
       const startDate = new Date("2025-08-21");
       const today = new Date();
-      const diffDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-      const index = ((diffDays % data.length) + data.length) % data.length;
-      return {word: data[index], index};
+      const diffDays = Math.floor((today - startDate)/(1000*60*60*24));
+      const index = ((diffDays % data.length)+data.length)%data.length;
+      return {word:data[index], index};
     }
 
-    // Contribute
-    contributeBtn.addEventListener("click", () => {
-      const modal = new bootstrap.Modal(document.getElementById("contributeModal"));
-      contributeMessage.innerHTML = "";
-      contributeForm.reset();
-      modal.show();
+    // EVENTS
+    document.getElementById("searchBox").addEventListener("input", e => {
+      const query = e.target.value.toLowerCase();
+      const filtered = data.filter(w => w.Word.toLowerCase().includes(query));
+      renderWordList(filtered);
     });
 
-    contributeForm.addEventListener("submit", async (e) => {
+    document.getElementById("randomBtn").addEventListener("click", () => {
+      if (!data.length) return;
+      const randIndex = Math.floor(Math.random()*data.length);
+      showWord(randIndex);
+    });
+
+    document.getElementById("contributeBtn").addEventListener("click", () => {
+      document.getElementById("contributeForm").reset();
+      document.getElementById("contributeMessage").innerHTML="";
+      new bootstrap.Modal(document.getElementById("contributeModal")).show();
+    });
+
+    document.getElementById("contributeForm").addEventListener("submit", async e => {
       e.preventDefault();
       const newEntry = {
-        Word: document.getElementById("newWord").value.trim(),
-        Definition: document.getElementById("newDefinition").value.trim(),
-        Sentence: document.getElementById("newSentence").value.trim(),
-        Category: document.getElementById("newCategory").value.trim()
+        Word: document.getElementById("contribWord").value.trim(),
+        Definition: document.getElementById("contribDefinition").value.trim(),
+        Sentence: document.getElementById("contribSentence").value.trim(),
+        Category: document.getElementById("contribCategory").value.trim()
       };
-      const userApiKey = document.getElementById("userApiKey").value.trim();
-
+      const apiKey = document.getElementById("contribApiKey").value.trim();
       try {
-        let currentData = await fetchData();
-        currentData.push(newEntry);
-        await updateData(userApiKey, currentData);
+        await updateData(apiKey, [...data,newEntry]);
         await refreshData();
         bootstrap.Modal.getInstance(document.getElementById("contributeModal")).hide();
-      } catch (err) {
-        contributeMessage.innerHTML = `<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> Failed: ${err.message}</div>`;
+      } catch(err) {
+        document.getElementById("contributeMessage").innerHTML=`<div class="alert alert-danger">${err.message}</div>`;
       }
     });
 
-    // Edit
-    window.openEditModal = function(index) {
-      const word = data[index];
-      document.getElementById("editIndex").value = index;
-      document.getElementById("editWord").value = word.Word;
-      document.getElementById("editDefinition").value = word.Definition;
-      document.getElementById("editSentence").value = word.Sentence;
-      document.getElementById("editCategory").value = word.Category;
-      editMessage.innerHTML = "";
-      const modal = new bootstrap.Modal(document.getElementById("editModal"));
-      modal.show();
-    };
+    function openEditModal(index) {
+      const w=data[index];
+      document.getElementById("editIndex").value=index;
+      document.getElementById("editWord").value=w.Word;
+      document.getElementById("editDefinition").value=w.Definition;
+      document.getElementById("editSentence").value=w.Sentence||"";
+      document.getElementById("editCategory").value=w.Category||"";
+      document.getElementById("editMessage").innerHTML="";
+      new bootstrap.Modal(document.getElementById("editModal")).show();
+    }
 
-    editForm.addEventListener("submit", async (e) => {
+    document.getElementById("editForm").addEventListener("submit", async e => {
       e.preventDefault();
-      const index = parseInt(document.getElementById("editIndex").value);
-      const userApiKey = document.getElementById("editApiKey").value.trim();
-
-      data[index] = {
+      const i=parseInt(document.getElementById("editIndex").value);
+      data[i] = {
         Word: document.getElementById("editWord").value.trim(),
         Definition: document.getElementById("editDefinition").value.trim(),
         Sentence: document.getElementById("editSentence").value.trim(),
         Category: document.getElementById("editCategory").value.trim()
       };
-
+      const apiKey=document.getElementById("editApiKey").value.trim();
       try {
-        await updateData(userApiKey, data);
+        await updateData(apiKey,data);
         await refreshData();
         bootstrap.Modal.getInstance(document.getElementById("editModal")).hide();
-      } catch (err) {
-        editMessage.innerHTML = `<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> Failed: ${err.message}</div>`;
+      } catch(err) {
+        document.getElementById("editMessage").innerHTML=`<div class="alert alert-danger">${err.message}</div>`;
       }
     });
+
+    // INIT
+    refreshData();
   </script>
 </body>
 </html>
