@@ -310,11 +310,11 @@
     async function fetchData() {
       if (!checkSettings()) return [];
       try {
-        const url = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
-        const res = await fetch(url, { headers: { "X-Access-Key": READ_API_KEY } });
-        if (!res.ok) throw new Error(`HTTP ${res.status} – ${res.statusText}`);
+        const url = "https://jsonkeeper.com/b/CQWDT"; // replace with your jsonkeeper URL
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
         const json = await res.json();
-        return json.record;
+        return json; // no .record here, JSONKeeper gives raw JSON
       } catch (err) {
         console.error("Failed to fetch JSON:", err);
         selectedWordDiv.innerHTML = `<div class="error-block"><strong>Error:</strong> ${err.message}</div>`;
@@ -350,6 +350,22 @@
         <div class="wotd-definition">${wotdDef}</div>
       `;
     }
+
+    // async function fetchData() {
+    //   if (!checkSettings()) return [];
+    //   try {
+    //     const url = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+    //     const res = await fetch(url, { headers: { "X-Access-Key": READ_API_KEY } });
+    //     if (!res.ok) throw new Error(`HTTP ${res.status} – ${res.statusText}`);
+    //     const json = await res.json();
+    //     return json.record;
+    //   } catch (err) {
+    //     console.error("Failed to fetch JSON:", err);
+    //     selectedWordDiv.innerHTML = `<div class="error-block"><strong>Error:</strong> ${err.message}</div>`;
+    //     return [];
+    //   }
+    // }
+
 
     function renderWordList(words) {
       currentList = words;
